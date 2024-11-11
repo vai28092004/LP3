@@ -1,0 +1,81 @@
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Scanner;
+
+class Item {
+    int weight;
+    int value;
+    double ratio;
+
+    public Item(int weight, int value) {
+        this.weight = weight;
+        this.value = value;
+        this.ratio = (double) value / weight;
+    }
+}
+
+public class LA3 {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input number of items
+        System.out.print("Enter the number of items: ");
+        int n = scanner.nextInt();
+
+        // Array to store items
+        Item[] items = new Item[n];
+
+        // Input item details
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter weight and value for item " + (i + 1) + ": ");
+            int weight = scanner.nextInt();
+            int value = scanner.nextInt();
+            items[i] = new Item(weight, value);
+        }
+
+        // Input knapsack capacity
+        System.out.print("Enter the knapsack capacity: ");
+        int capacity = scanner.nextInt();
+
+        // Get the maximum value that can be obtained
+        double maxValue = fractionalKnapsack(items, capacity);
+        System.out.println("Maximum value in knapsack: " + maxValue);
+
+        scanner.close();
+    }
+
+    public static double fractionalKnapsack(Item[] items, int capacity) {
+        // Sort items by value-to-weight ratio in descending order
+        Arrays.sort(items, Comparator.comparingDouble(item -> -item.ratio));
+
+        double totalValue = 0.0;
+
+        for (Item item : items) {
+            // If item can fully fit, take it
+            if (item.weight <= capacity) {
+                capacity -= item.weight;
+                totalValue += item.value;
+                System.out.println("Taking full item with weight " + item.weight + " and value " + item.value);
+            } else {
+                // Take as much of the item as possible
+                double fraction = (double) capacity / item.weight;
+                totalValue += item.value * fraction;
+                System.out.println("Taking " + (fraction * 100) + "% of item with weight " + item.weight + " and value " + item.value);
+                break;
+            }
+        }
+
+        return totalValue;
+    }
+}
+
+//Enter the number of items: 3
+//Enter weight and value for item 1: 10 60
+//Enter weight and value for item 2: 20 100
+//Enter weight and value for item 3: 30 120
+//Enter the knapsack capacity: 50
+//
+//Taking full item with weight 20 and value 100
+//Taking 100.0% of item with weight 30 and value 120
+//Maximum value in knapsack: 240.0
