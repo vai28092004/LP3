@@ -1,0 +1,60 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract EmployeeData {
+    // Define a structure to represent an employee
+    struct Employee {
+        uint256 id;
+        string name;
+        string position;
+        uint256 salary;
+    }
+
+    // Array to store employee data
+    Employee[] public employees;
+
+    // Mapping to track if an employee ID already exists
+    mapping(uint256 => bool) private employeeExists;
+
+    // Event to log employee addition
+    event EmployeeAdded(uint256 id, string name, string position, uint256 salary);
+
+    // Event to log Ether received
+    event EtherReceived(address indexed sender, uint256 amount);
+
+    // Function to add a new employee
+    function addEmployee(uint256 _id, string memory _name, string memory _position, uint256 _salary) public {
+        require(!employeeExists[_id], "Employee ID already exists.");
+        Employee memory newEmployee = Employee(_id, _name, _position, _salary);
+        employees.push(newEmployee);
+        employeeExists[_id] = true;
+        emit EmployeeAdded(_id, _name, _position, _salary);
+    }
+
+    // Function to retrieve an employee's information by index
+    function getEmployee(uint256 index) public view returns (uint256, string memory, string memory, uint256) {
+        require(index < employees.length, "Index out of bounds");
+        Employee memory emp = employees[index];
+        return (emp.id, emp.name, emp.position, emp.salary);
+    }
+
+    // Function to get the total number of employees
+    function getEmployeeCount() public view returns (uint256) {
+        return employees.length;
+    }
+
+    // Fallback function to handle direct Ether transfers or unknown function calls
+    fallback() external payable {
+        emit EtherReceived(msg.sender, msg.value);
+    }
+
+    // Receive function to accept Ether directly to the contract
+    receive() external payable {
+        emit EtherReceived(msg.sender, msg.value);
+    }
+
+    // Function to check the contract balance
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+}
