@@ -1,0 +1,63 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.decomposition import PCA
+
+data = pd.read_csv("sales_data_sample.csv", encoding='ISO-8859-1')
+
+print(data.head())
+print(data.info())
+
+features = data[['SALES', 'QUANTITYORDERED']]
+
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+
+inertia = []
+k_values = range(1, 11)
+
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(scaled_features)
+    inertia.append(kmeans.inertia_)
+
+plt.figure(figsize=(8, 6))
+plt.plot(k_values, inertia, marker='o')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Inertia')
+plt.title('Elbow Method for Optimal k')
+plt.show()
+
+optimal_k = 3
+kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+clusters = kmeans.fit_predict(scaled_features)
+
+data['Cluster'] = clusters
+
+pca = PCA(n_components=2)
+reduced_features = pca.fit_transform(scaled_features)
+
+plt.figure(figsize=(8, 6))
+plt.scatter(reduced_features[:, 0], reduced_features[:, 1], c=clusters, cmap='viridis', marker='o')
+plt.title('K-Means Clustering')
+plt.xlabel('PCA Component 1')
+plt.ylabel('PCA Component 2')
+plt.show()
+
+# Performing hierarchical clustering
+linked = linkage(scaled_features, method='ward')
+
+# Plotting dendrogram
+plt.figure(figsize=(10, 7))
+dendrogram(linked)
+plt.title('Hierarchical Clustering Dendrogram')
+plt.xlabel('Samples')
+plt.ylabel('Distance')
+plt.show()
+
+# Grouping by clusters and viewing mean values for insights
+cluster_summary = data.groupby('Cluster')[['SALES', 'QUANTITYORDERED']].mean()
+print(cluster_summary)
