@@ -1,0 +1,76 @@
+import java.util.Scanner;
+
+public class LA4 {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input number of items
+        System.out.print("Enter the number of items: ");
+        int n = scanner.nextInt();
+
+        // Input weights and values of items
+        int[] weights = new int[n];
+        int[] values = new int[n];
+        System.out.println("Enter weight and value for each item:");
+        for (int i = 0; i < n; i++) {
+            System.out.print("Item " + (i + 1) + " weight: ");
+            weights[i] = scanner.nextInt();
+            System.out.print("Item " + (i + 1) + " value: ");
+            values[i] = scanner.nextInt();
+        }
+
+        // Input knapsack capacity
+        System.out.print("Enter knapsack capacity: ");
+        int capacity = scanner.nextInt();
+
+        // Solve the knapsack problem and print the result
+        int maxValue = knapsackDP(weights, values, capacity, n);
+        System.out.println("Maximum value in knapsack: " + maxValue);
+
+        scanner.close();
+    }
+
+    public static int knapsackDP(int[] weights, int[] values, int capacity, int n) {
+        int[][] dp = new int[n + 1][capacity + 1];
+
+        // Fill the dp table
+        for (int i = 1; i <= n; i++) {
+            for (int w = 0; w <= capacity; w++) {
+                if (weights[i - 1] <= w) {
+                    dp[i][w] = Math.max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w]);
+                } else {
+                    dp[i][w] = dp[i - 1][w];
+                }
+            }
+        }
+
+        // Print selected items (optional)
+        System.out.println("Items selected:");
+        int w = capacity;
+        for (int i = n; i > 0 && w > 0; i--) {
+            if (dp[i][w] != dp[i - 1][w]) {
+                System.out.println("Item " + i + " with weight " + weights[i - 1] + " and value " + values[i - 1]);
+                w -= weights[i - 1];
+            }
+        }
+
+        // Return the maximum value achievable with the given capacity
+        return dp[n][capacity];
+    }
+}
+//Enter the number of items: 3
+//Enter weight and value for each item:
+//Item 1 weight: 10
+//Item 1 value: 60
+//Item 2 weight: 20
+//Item 2 value: 100
+//Item 3 weight: 30
+//Item 3 value: 120
+//Enter knapsack capacity: 50
+//
+//Items selected:
+//Item 3 with weight 30 and value 120
+//Item 2 with weight 20 and value 100
+//Maximum value in knapsack: 220
+
