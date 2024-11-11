@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract CustomerData {
+    
+    // Structure to hold each customer's information
+    struct Customer {
+        uint256 id;
+        string name;
+        uint8 age;
+        string email;
+    }
+
+    // Array to store all customers
+    Customer[] public customers;
+
+    // Mapping to check if a customer ID already exists
+    mapping(uint256 => bool) private customerExists;
+
+    // Event to log the addition of a new customer
+    event CustomerAdded(uint256 id, string name, uint8 age, string email);
+
+    // Event to log when Ether is received
+    event Received(address sender, uint256 amount);
+
+    // Function to add a new customer
+    function addCustomer(uint256 _id, string memory _name, uint8 _age, string memory _email) public {
+        // Ensure the customer ID does not already exist
+        require(!customerExists[_id], "Customer with this ID already exists.");
+
+        // Add the customer data to the array
+        customers.push(Customer(_id, _name, _age, _email));
+
+        // Mark the customer ID as existing
+        customerExists[_id] = true;
+
+        // Emit event to log the new customer addition
+        emit CustomerAdded(_id, _name, _age, _email);
+    }
+
+    // Function to get details of a customer by their index in the array
+    function getCustomer(uint256 _index) public view returns (uint256, string memory, uint8, string memory) {
+        require(_index < customers.length, "Invalid index.");
+        Customer storage customer = customers[_index];
+        return (customer.id, customer.name, customer.age, customer.email);
+    }
+
+    // Fallback function to handle unexpected calls or Ether sent to contract
+    fallback() external payable {
+        emit Received(msg.sender, msg.value);
+    }
+
+    // Receive function to accept Ether explicitly
+    receive() external payable {
+        emit Received(msg.sender, msg.value);
+    }
+
+    // Function to retrieve the balance of the contract
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+}
+//21,Alice,19,Alice@abc.com
+//0
+//0 or 1
