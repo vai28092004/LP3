@@ -1,0 +1,83 @@
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Scanner;
+
+class Job {
+    int id;       // Job ID
+    int deadline; // Job deadline
+    int profit;   // Job profit
+
+    public Job(int id, int deadline, int profit) {
+        this.id = id;
+        this.deadline = deadline;
+        this.profit = profit;
+    }
+}
+
+public class LA2 {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input number of jobs
+        System.out.print("Enter the number of jobs: ");
+        int numJobs = scanner.nextInt();
+
+        // Array to store jobs
+        Job[] jobs = new Job[numJobs];
+
+        // Input job details
+        for (int i = 0; i < numJobs; i++) {
+            System.out.print("Enter deadline and profit for Job " + (i + 1) + ": ");
+            int deadline = scanner.nextInt();
+            int profit = scanner.nextInt();
+            jobs[i] = new Job(i + 1, deadline, profit);
+        }
+
+        // Find the maximum deadline to define the array size for time slots
+        int maxDeadline = Arrays.stream(jobs).mapToInt(job -> job.deadline).max().orElse(0);
+
+        // Get the sequence of jobs and total profit
+        jobSequencing(jobs, maxDeadline);
+
+        scanner.close();
+    }
+
+    public static void jobSequencing(Job[] jobs, int maxDeadline) {
+        // Sort jobs by profit in descending order
+        Arrays.sort(jobs, Comparator.comparingInt(job -> -job.profit));
+
+        // Array to keep track of free time slots
+        boolean[] slots = new boolean[maxDeadline];
+        // Array to store the sequence of scheduled job IDs
+        int[] result = new int[maxDeadline];
+        Arrays.fill(result, -1); // Initialize result array with -1 indicating no job scheduled
+
+        int totalProfit = 0;
+        int jobCount = 0;
+
+        // Schedule jobs
+        for (Job job : jobs) {
+            // Try to find a free slot for this job (starting from the latest slot before the deadline)
+            for (int j = Math.min(maxDeadline - 1, job.deadline - 1); j >= 0; j--) {
+                if (!slots[j]) {  // If the slot is free
+                    slots[j] = true;       // Mark this slot as occupied
+                    result[j] = job.id;    // Store job ID in the result
+                    totalProfit += job.profit; // Add job's profit to total profit
+                    jobCount++;             // Increment the count of scheduled jobs
+                    break;                  // Stop looking for more slots
+                }
+            }
+        }
+
+        // Display scheduled jobs and total profit
+        System.out.println("\nScheduled Jobs:");
+        for (int i = 0; i < maxDeadline; i++) {
+            if (result[i] != -1) {
+                System.out.print("Job" + result[i] + " ");
+            }
+        }
+        System.out.println("\nTotal Profit: " + totalProfit);
+        System.out.println("Total Jobs Scheduled: " + jobCount);
+    }
+}
